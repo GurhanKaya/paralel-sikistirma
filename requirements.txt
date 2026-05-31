@@ -1,0 +1,1 @@
+# zlib ve concurrent.futures Python built-in — ek paket gerekmez
