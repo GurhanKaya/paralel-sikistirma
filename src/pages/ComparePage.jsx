@@ -18,7 +18,7 @@ export default function ComparePage() {
       form.append("file", file);
       const res = await fetch("/api/compress?mode=compare", { method: "POST", body: form });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Karşılaştırma başarısız");
+      if (!res.ok) throw new Error(data.error || "Karsilastirma basarisiz");
       setResult(data);
     } catch (e) {
       setError(e.message);
@@ -34,44 +34,56 @@ export default function ComparePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
+    <div className="max-w-xl mx-auto px-6">
+      {/* Sayfa başlığı */}
+      <div className="text-center mb-10">
+        <h1 className="text-4xl font-extrabold tracking-tight mb-4">
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
-            Seri vs Paralel Karşılaştırma
+            Seri vs Paralel
           </span>
         </h1>
-        <p className="text-slate-400 text-lg">
-          Aynı dosya hem seri hem paralel sıkıştırılır, gerçek süreler ölçülür.
+        <p className="text-slate-400 text-base leading-relaxed">
+          Aynı dosya hem seri hem paralel sıkıştırılır — gerçek süreler karşılaştırılır.
         </p>
       </div>
 
-      <div className="bg-slate-900/60 rounded-3xl shadow-2xl shadow-black/40 p-6 md:p-8 border border-white/10 backdrop-blur">
+      {/* Ana kart */}
+      <div className="bg-slate-900/50 rounded-3xl border border-white/10 backdrop-blur p-8 space-y-6 shadow-2xl shadow-black/30">
         {!result ? (
           <>
             <Dropzone file={file} onFile={setFile} disabled={loading} />
+
+            {error && (
+              <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-sm">
+                {error}
+              </div>
+            )}
+
             <button
               onClick={run}
               disabled={!file || loading}
-              className="mt-5 w-full py-4 rounded-2xl font-semibold text-lg text-white transition-all duration-200
-                bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500
-                disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-violet-900/40"
+              className="w-full py-4 rounded-2xl font-semibold text-base text-white transition-all duration-300
+                bg-gradient-to-r from-violet-600 to-blue-600
+                hover:from-violet-500 hover:to-blue-500 hover:shadow-lg hover:shadow-violet-900/40 hover:scale-[1.01]
+                disabled:opacity-35 disabled:cursor-not-allowed disabled:scale-100 disabled:shadow-none
+                active:scale-[0.99]"
             >
               {loading ? (
-                <span className="flex items-center justify-center gap-3"><Spinner /> Seri + Paralel ölçülüyor...</span>
-              ) : ("⚖ Karşılaştırmayı Başlat")}
+                <span className="flex items-center justify-center gap-3">
+                  <Spinner /> Ölçülüyor...
+                </span>
+              ) : (
+                "Karşılaştır"
+              )}
             </button>
-            {error && (
-              <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">{error}</div>
-            )}
           </>
         ) : (
           <CompareResult result={result} onReset={reset} />
         )}
       </div>
 
-      <p className="text-center text-slate-500 text-xs mt-6">
-        Her ölçüm 3 kez çalıştırılıp en iyi süre alınır · Gerçek zamanlı, sunucu tarafı ölçüm
+      <p className="text-center text-slate-600 text-xs mt-6">
+        Her ölçüm 3 kez tekrarlanır, en hızlı süre alınır · Gerçek sunucu tarafı ölçüm
       </p>
     </div>
   );
@@ -83,77 +95,105 @@ function CompareResult({ result, onReset }) {
   const parallelFaster = speedup != null && speedup >= 1;
 
   return (
-    <div className="animate-fade-in">
-      <div className="text-center mb-6">
-        <div className="text-slate-300 text-sm break-all">{result.filename.replace(/\.gz$/, "")}</div>
-        <div className="text-slate-500 text-xs mt-1">
+    <div className="space-y-6 animate-fade-in">
+      {/* Dosya bilgisi */}
+      <div className="text-center space-y-1">
+        <p className="text-slate-300 text-sm font-medium break-all">{result.filename.replace(/\.gz$/, "")}</p>
+        <p className="text-slate-500 text-xs">
           {formatBytes(result.original_bytes)} · {result.chunk_count} parça · {result.workers} worker
-        </div>
+        </p>
       </div>
 
-      <div className="text-center mb-6">
+      {/* Speedup rozeti */}
+      <div className="text-center">
         <div
-          className={`inline-block px-6 py-3 rounded-2xl font-extrabold text-3xl border ${
+          className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-2xl border transition-all ${
             parallelFaster
-              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-              : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/25"
+              : "bg-amber-500/10 text-amber-400 border-amber-500/25"
           }`}
         >
-          {speedup != null ? `${speedup.toFixed(2)}x` : "—"}{" "}
-          <span className="text-base font-medium">{parallelFaster ? "hızlanma" : "(paralel yavaş)"}</span>
+          <span>{speedup != null ? `${speedup.toFixed(2)}x` : "—"}</span>
+          <span className="text-sm font-medium text-current opacity-70">
+            {parallelFaster ? "hızlanma" : "paralel yavaş"}
+          </span>
         </div>
       </div>
 
-      <div className="space-y-4 mb-6">
-        <TimeBar label="🔴 Seri (tek thread)" time={serial_time}
-          pct={((serial_time || 0) / maxT) * 100} color="bg-gradient-to-r from-red-500 to-red-400" />
-        <TimeBar label="🟢 Paralel (çok worker)" time={parallel_time}
-          pct={((parallel_time || 0) / maxT) * 100} color="bg-gradient-to-r from-emerald-500 to-green-400" />
+      {/* Bar karşılaştırma */}
+      <div className="space-y-4 bg-white/3 rounded-2xl px-6 py-5 border border-white/8">
+        <TimeBar
+          label="Seri"
+          sub="tek thread, sırayla"
+          time={serial_time}
+          pct={((serial_time || 0) / maxT) * 100}
+          barColor="bg-gradient-to-r from-red-600 to-red-400"
+          dotColor="bg-red-500"
+        />
+        <TimeBar
+          label="Paralel"
+          sub={`${result.workers} worker, eş zamanlı`}
+          time={parallel_time}
+          pct={((parallel_time || 0) / maxT) * 100}
+          barColor="bg-gradient-to-r from-emerald-600 to-emerald-400"
+          dotColor="bg-emerald-500"
+        />
       </div>
 
-      {!parallelFaster && (
-        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm mb-6">
-          ⚠️ <strong>Küçük/hızlı dosyada beklenen sonuç:</strong> Bu dosya {result.chunk_count} parçaya bölündü ve çok
-          hızlı sıkıştı. Thread başlatma maliyeti, kazançtan büyük olabiliyor. Daha büyük (1 MB+) ve sıkışabilir bir
-          dosyada paralel belirgin şekilde öne geçer.
-        </div>
-      )}
-      {parallelFaster && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm mb-6">
-          ✓ <strong>Paralel kazandı!</strong> {result.chunk_count} parça {result.workers} worker'a dağıtıldı; zlib
-          GIL'i bıraktığı için thread'ler gerçekten eş zamanlı çalıştı.
-        </div>
-      )}
+      {/* Açıklama */}
+      <div
+        className={`px-5 py-4 rounded-2xl border text-sm leading-relaxed ${
+          parallelFaster
+            ? "bg-emerald-500/8 border-emerald-500/20 text-emerald-300"
+            : "bg-amber-500/8 border-amber-500/20 text-amber-300"
+        }`}
+      >
+        {parallelFaster
+          ? `${result.chunk_count} parça ${result.workers} worker'a dağıtıldı. zlib GIL'i bıraktığı için thread'ler gerçekten eş zamanlı çalıştı.`
+          : `Bu dosya çok hızlı sıkıştı. Thread başlatma maliyeti, kazançtan büyük oldu. 1 MB+ ve sıkışabilir bir dosyada paralel belirgin şekilde öne geçer.`}
+      </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
+      {/* Butonlar */}
+      <div className="flex gap-3">
         <button
           onClick={() => downloadBase64(result.file_b64, result.filename)}
-          className="flex-1 py-3.5 rounded-2xl font-semibold text-white
-            bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500
-            shadow-lg shadow-violet-900/40 transition-all"
+          className="flex-1 py-3.5 rounded-2xl font-semibold text-white text-sm
+            bg-gradient-to-r from-violet-600 to-blue-600
+            hover:from-violet-500 hover:to-blue-500 hover:shadow-lg hover:shadow-violet-900/40 hover:scale-[1.01]
+            transition-all duration-200 active:scale-[0.99]"
         >
-          ⬇ Sıkıştırılmış Dosyayı İndir
+          İndir  ·  {result.filename}
         </button>
         <button
           onClick={onReset}
-          className="py-3.5 px-6 rounded-2xl font-medium text-slate-300 bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
+          className="px-5 py-3.5 rounded-2xl font-medium text-slate-300 text-sm
+            bg-white/5 hover:bg-white/10 border border-white/10 transition-all duration-200"
         >
-          Yeni Dosya
+          Yeni
         </button>
       </div>
     </div>
   );
 }
 
-function TimeBar({ label, time, pct, color }) {
+function TimeBar({ label, sub, time, pct, barColor, dotColor }) {
   return (
-    <div>
-      <div className="flex justify-between text-sm mb-1.5">
-        <span className="text-slate-300 font-medium">{label}</span>
-        <span className="text-slate-100 font-mono font-semibold">{formatTime(time)}</span>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${dotColor}`} />
+          <div>
+            <span className="text-slate-200 text-sm font-semibold">{label}</span>
+            <span className="text-slate-500 text-xs ml-2">{sub}</span>
+          </div>
+        </div>
+        <span className="text-slate-100 font-mono font-semibold text-sm">{formatTime(time)}</span>
       </div>
-      <div className="h-6 bg-white/5 rounded-full overflow-hidden border border-white/5">
-        <div className={`h-full rounded-full transition-all duration-700 ${color}`} style={{ width: `${Math.max(pct, 4)}%` }} />
+      <div className="h-3 bg-white/5 rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-700 ${barColor}`}
+          style={{ width: `${Math.max(pct, 3)}%` }}
+        />
       </div>
     </div>
   );
@@ -161,7 +201,7 @@ function TimeBar({ label, time, pct, color }) {
 
 function Spinner() {
   return (
-    <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
     </svg>

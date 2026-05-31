@@ -18,7 +18,7 @@ export default function CompressPage() {
       form.append("file", file);
       const res = await fetch("/api/compress?mode=parallel", { method: "POST", body: form });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Sıkıştırma başarısız");
+      if (!res.ok) throw new Error(data.error || "Sikistirma basarisiz");
       setResult(data);
     } catch (e) {
       setError(e.message);
@@ -34,45 +34,56 @@ export default function CompressPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
+    <div className="max-w-xl mx-auto px-6">
+      {/* Sayfa başlığı */}
+      <div className="text-center mb-10">
+        <h1 className="text-4xl font-extrabold tracking-tight mb-4">
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
-            Dosyanı Paralel Sıkıştır
+            Paralel Sıkıştırma
           </span>
         </h1>
-        <p className="text-slate-400 text-lg">
-          Dosyanı yükle, paralel worker'larla saniyeler içinde sıkıştırılsın ve indir.
+        <p className="text-slate-400 text-base leading-relaxed">
+          Dosyanı yükle, paralel worker'larla sıkıştırılsın ve indir.
         </p>
       </div>
 
-      <div className="bg-slate-900/60 rounded-3xl shadow-2xl shadow-black/40 p-6 md:p-8 border border-white/10 backdrop-blur">
+      {/* Ana kart */}
+      <div className="bg-slate-900/50 rounded-3xl border border-white/10 backdrop-blur p-8 space-y-6 shadow-2xl shadow-black/30">
         {!result ? (
           <>
             <Dropzone file={file} onFile={setFile} disabled={loading} />
+
+            {error && (
+              <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-sm">
+                {error}
+              </div>
+            )}
+
             <button
               onClick={compress}
               disabled={!file || loading}
-              className="mt-5 w-full py-4 rounded-2xl font-semibold text-lg text-white transition-all duration-200
-                bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500
-                disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-violet-900/40"
+              className="w-full py-4 rounded-2xl font-semibold text-base text-white transition-all duration-300
+                bg-gradient-to-r from-violet-600 to-blue-600
+                hover:from-violet-500 hover:to-blue-500 hover:shadow-lg hover:shadow-violet-900/40 hover:scale-[1.01]
+                disabled:opacity-35 disabled:cursor-not-allowed disabled:scale-100 disabled:shadow-none
+                active:scale-[0.99]"
             >
               {loading ? (
-                <span className="flex items-center justify-center gap-3"><Spinner /> Paralel sıkıştırılıyor...</span>
-              ) : ("⚡ Sıkıştır")}
+                <span className="flex items-center justify-center gap-3">
+                  <Spinner /> Sıkıştırılıyor...
+                </span>
+              ) : (
+                "Sıkıştır"
+              )}
             </button>
-            {error && (
-              <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">{error}</div>
-            )}
           </>
         ) : (
           <SuccessResult result={result} onReset={reset} />
         )}
       </div>
 
-      <p className="text-center text-slate-500 text-xs mt-6">
-        İşlem Vercel sunucusunda gerçek <strong className="text-slate-400">zlib/gzip</strong> ile yapılır ·{" "}
-        İndirilen <strong className="text-slate-400">.gz</strong> dosyası 7-Zip/WinRAR ile açılabilir
+      <p className="text-center text-slate-600 text-xs mt-6">
+        Vercel sunucusunda zlib/gzip ile sıkıştırılır · İndirilen .gz dosyası 7-Zip ile açılabilir
       </p>
     </div>
   );
@@ -80,68 +91,64 @@ export default function CompressPage() {
 
 function SuccessResult({ result, onReset }) {
   return (
-    <div className="text-center animate-fade-in">
-      <div className="text-6xl mb-4">✅</div>
-      <h2 className="text-2xl font-bold text-slate-100 mb-1">Sıkıştırma tamamlandı!</h2>
-      <p className="text-slate-400 mb-6">
-        <strong className="text-violet-400">{formatTime(result.parallel_time)}</strong> içinde,{" "}
-        <strong className="text-slate-200">{result.workers} paralel worker</strong> ile sıkıştırıldı
-      </p>
-
-      <div className="flex items-center justify-center gap-4 mb-6">
-        <div className="text-center">
-          <div className="text-slate-500 text-xs uppercase tracking-wide">Önce</div>
-          <div className="text-2xl font-bold text-slate-200">{formatBytes(result.original_bytes)}</div>
+    <div className="space-y-6 animate-fade-in">
+      {/* Onay başlığı */}
+      <div className="text-center space-y-2">
+        <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
+          <svg className="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
         </div>
-        <div className="text-3xl text-slate-600">→</div>
-        <div className="text-center">
-          <div className="text-slate-500 text-xs uppercase tracking-wide">Sonra</div>
-          <div className="text-2xl font-bold text-emerald-400">{formatBytes(result.compressed_bytes)}</div>
+        <h2 className="text-xl font-bold text-slate-100">Tamamlandı</h2>
+        <p className="text-slate-400 text-sm">
+          {formatTime(result.parallel_time)} · {result.workers} worker · {result.chunk_count} parça
+        </p>
+      </div>
+
+      {/* Boyut karşılaştırma */}
+      <div className="flex items-center gap-4 bg-white/3 rounded-2xl px-6 py-5 border border-white/8">
+        <div className="flex-1 text-center">
+          <p className="text-slate-500 text-xs uppercase tracking-widest mb-1">Orijinal</p>
+          <p className="text-slate-200 font-bold text-xl">{formatBytes(result.original_bytes)}</p>
+        </div>
+        <svg className="w-5 h-5 text-slate-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+        </svg>
+        <div className="flex-1 text-center">
+          <p className="text-slate-500 text-xs uppercase tracking-widest mb-1">Sıkıştırılmış</p>
+          <p className="text-emerald-400 font-bold text-xl">{formatBytes(result.compressed_bytes)}</p>
+        </div>
+        <div className="shrink-0 px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/25">
+          <p className="text-emerald-400 font-bold text-sm">%{result.savings_pct}</p>
         </div>
       </div>
 
-      <div className="inline-block px-5 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 mb-6">
-        <span className="text-emerald-400 font-bold text-lg">%{result.savings_pct} tasarruf</span>
-      </div>
-
-      <div className="grid grid-cols-3 gap-3 mb-6 text-sm">
-        <MiniStat label="Parça" value={result.chunk_count} />
-        <MiniStat label="Worker" value={result.workers} />
-        <MiniStat label="Parça boyutu" value={`${result.chunk_kb} KB`} />
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-3">
+      {/* Butonlar */}
+      <div className="flex gap-3">
         <button
           onClick={() => downloadBase64(result.file_b64, result.filename)}
-          className="flex-1 py-4 rounded-2xl font-semibold text-white text-lg
-            bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500
-            shadow-lg shadow-violet-900/40 transition-all"
+          className="flex-1 py-3.5 rounded-2xl font-semibold text-white text-sm
+            bg-gradient-to-r from-violet-600 to-blue-600
+            hover:from-violet-500 hover:to-blue-500 hover:shadow-lg hover:shadow-violet-900/40 hover:scale-[1.01]
+            transition-all duration-200 active:scale-[0.99]"
         >
-          ⬇ Sıkıştırılmış Dosyayı İndir
+          İndir  ·  {result.filename}
         </button>
         <button
           onClick={onReset}
-          className="py-4 px-6 rounded-2xl font-medium text-slate-300 bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
+          className="px-5 py-3.5 rounded-2xl font-medium text-slate-300 text-sm
+            bg-white/5 hover:bg-white/10 border border-white/10 transition-all duration-200"
         >
-          Yeni Dosya
+          Yeni
         </button>
       </div>
-    </div>
-  );
-}
-
-function MiniStat({ label, value }) {
-  return (
-    <div className="bg-white/5 rounded-xl py-3 px-2 border border-white/10">
-      <div className="text-slate-100 font-bold text-lg">{value}</div>
-      <div className="text-slate-500 text-xs mt-0.5">{label}</div>
     </div>
   );
 }
 
 function Spinner() {
   return (
-    <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
     </svg>
