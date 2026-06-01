@@ -1,0 +1,2 @@
+# Sadece lokal geliştirme aracı — Vercel'de serverless fonksiyon olarak deploy edilmesin
+api/devserver.py

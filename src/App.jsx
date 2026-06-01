@@ -19,16 +19,12 @@ export default function App() {
             onClick={() => setPage("compress")}
             className="font-bold text-sm sm:text-base tracking-tight text-slate-100 hover:text-white transition-colors"
           >
-            Paralel Sikistirma
+            Paralel Sıkıştırma
           </button>
 
-          <nav className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl p-1">
-            <span
-              className="absolute top-1 bottom-1 w-1/2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 shadow-lg shadow-violet-900/40 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-              style={{ transform: page === "compress" ? "translateX(0)" : "translateX(100%)" }}
-            />
-            <TabBtn active={page === "compress"} onClick={() => setPage("compress")}>Sikistir</TabBtn>
-            <TabBtn active={page === "compare"} onClick={() => setPage("compare")}>Karsilastir</TabBtn>
+          <nav className="flex items-center gap-2 sm:gap-3">
+            <TabBtn active={page === "compress"} onClick={() => setPage("compress")}>Sıkıştır</TabBtn>
+            <TabBtn active={page === "compare"} onClick={() => setPage("compare")}>Karşılaştır</TabBtn>
           </nav>
         </div>
       </header>
@@ -46,8 +42,10 @@ function TabBtn({ active, onClick, children }) {
   return (
     <button
       onClick={onClick}
-      className={`relative z-10 px-5 sm:px-6 py-2 rounded-xl text-sm font-semibold transition-colors duration-300 ${
-        active ? "text-white" : "text-slate-400 hover:text-slate-200"
+      className={`px-4 sm:px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+        active
+          ? "bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-900/40 -translate-y-0.5"
+          : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white hover:-translate-y-0.5"
       }`}
     >
       {children}

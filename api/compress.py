@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
 COMPRESS_LEVEL = 6                       # orijinal kodla aynı seviye
-MAX_FILE = 4 * 1024 * 1024              # 4 MB — Vercel request limiti güvenli marj
+MAX_FILE = 10 * 1024 * 1024             # 10 MB üst sınır
 REPEAT = 3                              # ölçüm tekrar sayısı (ortalama için)
 
 
@@ -159,7 +159,7 @@ class handler(BaseHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", 0))
 
             if length > MAX_FILE + 1024 * 1024:
-                self._err(413, "Dosya çok büyük (max 4 MB)")
+                self._err(413, "Dosya çok büyük (max 10 MB)")
                 return
 
             body = self.rfile.read(length)
@@ -174,7 +174,7 @@ class handler(BaseHTTPRequestHandler):
                 return
 
             if len(file_data) > MAX_FILE:
-                self._err(413, "Dosya çok büyük (max 4 MB)")
+                self._err(413, "Dosya çok büyük (max 10 MB)")
                 return
 
             original_size = len(file_data)

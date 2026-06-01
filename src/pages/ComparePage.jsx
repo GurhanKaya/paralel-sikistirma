@@ -20,10 +20,12 @@ export default function ComparePage() {
       form.append("file", file);
       const res = await fetch("/api/compress?mode=compare", { method: "POST", body: form });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Karsilastirma basarisiz");
+      if (!res.ok) throw new Error(data.error || "Karşılaştırma başarısız");
       setResult(data);
     } catch (e) {
-      setError(e.message);
+      setError(e.message === "Failed to fetch"
+        ? "Sunucuya ulaşılamadı. Backend çalışıyor mu? (npm run dev otomatik başlatır)"
+        : e.message);
     } finally {
       setLoading(false);
     }
@@ -55,8 +57,8 @@ export default function ComparePage() {
             active:translate-y-0"
         >
           {loading ? (
-            <span className="flex items-center justify-center gap-3"><Spinner /> Olculuyor...</span>
-          ) : "Karsilastir"}
+            <span className="flex items-center justify-center gap-3"><Spinner /> Ölçülüyor...</span>
+          ) : "Karşılaştır"}
         </button>
       </Card>
 
@@ -69,7 +71,7 @@ export default function ComparePage() {
       )}
 
       <p className="text-center text-slate-500 text-xs">
-        Her olcum 3 kez tekrarlanir, en hizli sure alinir · Gercek sunucu tarafi olcum
+        Her ölçüm 3 kez tekrarlanır, en hızlı süre alınır · Gerçek sunucu tarafı ölçüm
       </p>
     </div>
   );
@@ -86,7 +88,7 @@ function CompareResult({ result }) {
       <div className="text-center space-y-1">
         <p className="text-slate-300 text-sm font-medium break-all px-2">{result.filename.replace(/\.gz$/, "")}</p>
         <p className="text-slate-500 text-xs">
-          {formatBytes(result.original_bytes)} · {result.chunk_count} parca · {result.workers} worker
+          {formatBytes(result.original_bytes)} · {result.chunk_count} parça · {result.workers} worker
         </p>
       </div>
 
@@ -95,18 +97,18 @@ function CompareResult({ result }) {
           {speedupAnim}x
         </div>
         <div className="text-slate-500 text-sm mt-1">
-          {parallelFaster ? "paralel hizlanma" : "paralel daha yavas"}
+          {parallelFaster ? "paralel hızlanma" : "paralel daha yavaş"}
         </div>
       </div>
 
       <div className="space-y-4 bg-white/[0.03] rounded-2xl px-5 py-5 border border-white/8">
         <TimeBar
-          label="Seri" sub="tek thread, sirayla"
+          label="Seri" sub="tek thread, sırayla"
           time={serial_time} pct={((serial_time || 0) / maxT) * 100}
           barColor="from-red-600 to-red-400" dotColor="bg-red-500" delay={150}
         />
         <TimeBar
-          label="Paralel" sub={`${result.workers} worker, es zamanli`}
+          label="Paralel" sub={`${result.workers} worker, eş zamanlı`}
           time={parallel_time} pct={((parallel_time || 0) / maxT) * 100}
           barColor="from-emerald-600 to-emerald-400" dotColor="bg-emerald-500" delay={350}
         />
@@ -118,8 +120,8 @@ function CompareResult({ result }) {
           : "bg-amber-500/8 border-amber-500/20 text-amber-300"
       }`}>
         {parallelFaster
-          ? `${result.chunk_count} parca ${result.workers} worker'a dagitildi. zlib GIL'i birakti, thread'ler gercekten es zamanli calisit.`
-          : `Bu dosya cok hizli sikisti; thread baslatma maliyeti kazanctan buyuk oldu. 1 MB+ ve sikisabilir bir dosyada paralel belirgin sekilde one gecer.`}
+          ? `${result.chunk_count} parça ${result.workers} worker'a dağıtıldı. zlib GIL'i bıraktı, thread'ler gerçekten eş zamanlı çalıştı.`
+          : `Bu dosya çok hızlı sıkıştı; thread başlatma maliyeti kazançtan büyük oldu. 1 MB+ ve sıkışabilir bir dosyada paralel belirgin şekilde öne geçer.`}
       </div>
 
       <button
@@ -128,7 +130,7 @@ function CompareResult({ result }) {
           bg-gradient-to-r from-violet-600 to-blue-600 hover:shadow-xl hover:shadow-violet-900/50 hover:-translate-y-0.5
           transition-all duration-300 active:translate-y-0"
       >
-        <span className="block truncate px-2">Indir · {result.filename}</span>
+        <span className="block truncate px-2">İndir · {result.filename}</span>
       </button>
     </div>
   );

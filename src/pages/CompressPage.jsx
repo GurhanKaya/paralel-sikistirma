@@ -20,10 +20,12 @@ export default function CompressPage() {
       form.append("file", file);
       const res = await fetch("/api/compress?mode=parallel", { method: "POST", body: form });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Sikistirma basarisiz");
+      if (!res.ok) throw new Error(data.error || "Sıkıştırma başarısız");
       setResult(data);
     } catch (e) {
-      setError(e.message);
+      setError(e.message === "Failed to fetch"
+        ? "Sunucuya ulaşılamadı. Backend çalışıyor mu? (npm run dev otomatik başlatır)"
+        : e.message);
     } finally {
       setLoading(false);
     }
@@ -51,8 +53,8 @@ export default function CompressPage() {
             active:translate-y-0"
         >
           {loading ? (
-            <span className="flex items-center justify-center gap-3"><Spinner /> Sikistiriliyor...</span>
-          ) : "Sikistir"}
+            <span className="flex items-center justify-center gap-3"><Spinner /> Sıkıştırılıyor...</span>
+          ) : "Sıkıştır"}
         </button>
       </Card>
 
@@ -65,7 +67,7 @@ export default function CompressPage() {
       )}
 
       <p className="text-center text-slate-500 text-xs">
-        Vercel sunucusunda zlib/gzip ile sikistirilir · Indirilen .gz dosyasi 7-Zip ile acilabilir
+        Sunucu tarafında zlib/gzip ile sıkıştırılır · İndirilen .gz dosyası 7-Zip ile açılabilir
       </p>
     </div>
   );
@@ -82,9 +84,9 @@ function SuccessResult({ result }) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         </div>
-        <p className="text-slate-300 text-sm font-medium">Sikistirma tamamlandi</p>
+        <p className="text-slate-300 text-sm font-medium">Sıkıştırma tamamlandı</p>
         <p className="text-slate-500 text-xs">
-          {formatTime(result.parallel_time)} · {result.workers} worker · {result.chunk_count} parca
+          {formatTime(result.parallel_time)} · {result.workers} worker · {result.chunk_count} parça
         </p>
       </div>
 
@@ -92,7 +94,7 @@ function SuccessResult({ result }) {
         <div className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-400">
           %{savings}
         </div>
-        <div className="text-slate-500 text-sm mt-1">daha kucuk</div>
+        <div className="text-slate-500 text-sm mt-1">daha küçük</div>
       </div>
 
       <div className="flex items-center gap-4 bg-white/[0.03] rounded-2xl px-5 py-4 border border-white/8">
@@ -104,7 +106,7 @@ function SuccessResult({ result }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
         </svg>
         <div className="flex-1 text-center min-w-0">
-          <p className="text-slate-500 text-[11px] uppercase tracking-widest mb-1">Sikistirilmis</p>
+          <p className="text-slate-500 text-[11px] uppercase tracking-widest mb-1">Sıkıştırılmış</p>
           <p className="text-emerald-400 font-bold text-lg truncate">{formatBytes(result.compressed_bytes)}</p>
         </div>
       </div>
@@ -115,7 +117,7 @@ function SuccessResult({ result }) {
           bg-gradient-to-r from-violet-600 to-blue-600 hover:shadow-xl hover:shadow-violet-900/50 hover:-translate-y-0.5
           transition-all duration-300 active:translate-y-0"
       >
-        <span className="block truncate px-2">Indir · {result.filename}</span>
+        <span className="block truncate px-2">İndir · {result.filename}</span>
       </button>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { formatBytes } from "../lib/download";
 
-const MAX_MB = 4;
+const MAX_MB = 10;
 const MAX_BYTES = MAX_MB * 1024 * 1024;
 
 export default function Dropzone({ file, onFile, disabled }) {
