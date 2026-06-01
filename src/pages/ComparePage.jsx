@@ -28,125 +28,112 @@ export default function ComparePage() {
     }
   }
 
-  const reset = () => { setFile(null); setResult(null); setError(null); };
+  function clearResult() {
+    setResult(null);
+    setError(null);
+  }
 
   return (
-    <div className="w-full">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4 animate-fade-in">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-blue-400 animate-gradient">
-            Seri vs Paralel
-          </span>
-        </h1>
-        <p className="text-slate-400 text-base sm:text-lg leading-relaxed animate-fade-in delay-1">
-          Aynı dosya hem seri hem paralel sıkıştırılır — gerçek süreler karşılaştırılır.
-        </p>
-      </div>
+    <div className="w-full space-y-4">
+      {/* Kart 1: Her zaman gorunur */}
+      <Card>
+        <Dropzone file={file} onFile={(f) => { setFile(f); clearResult(); }} disabled={loading} />
 
-      <div className="relative animate-fade-in delay-2">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-blue-600 rounded-[28px] blur opacity-20" />
-        <div className="relative bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-white/10 p-7 sm:p-9 space-y-6">
-          {!result ? (
-            <>
-              <Dropzone file={file} onFile={setFile} disabled={loading} />
+        {error && (
+          <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-sm">
+            {error}
+          </div>
+        )}
 
-              {error && (
-                <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-sm animate-fade-in">
-                  {error}
-                </div>
-              )}
+        <button
+          onClick={run}
+          disabled={!file || loading}
+          className="shimmer relative overflow-hidden w-full py-4 rounded-2xl font-semibold text-base text-white
+            transition-all duration-300 bg-gradient-to-r from-violet-600 to-blue-600
+            hover:shadow-xl hover:shadow-violet-900/50 hover:-translate-y-0.5
+            disabled:opacity-35 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none
+            active:translate-y-0"
+        >
+          {loading ? (
+            <span className="flex items-center justify-center gap-3"><Spinner /> Olculuyor...</span>
+          ) : "Karsilastir"}
+        </button>
+      </Card>
 
-              <button
-                onClick={run}
-                disabled={!file || loading}
-                className="shimmer relative overflow-hidden w-full py-4 rounded-2xl font-semibold text-base text-white
-                  transition-all duration-300 bg-gradient-to-r from-violet-600 to-blue-600
-                  hover:shadow-xl hover:shadow-violet-900/50 hover:-translate-y-0.5
-                  disabled:opacity-35 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none
-                  active:translate-y-0"
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-3"><Spinner /> Ölçülüyor...</span>
-                ) : "Karşılaştır"}
-              </button>
-            </>
-          ) : (
-            <CompareResult result={result} onReset={reset} />
-          )}
+      {/* Kart 2: Sadece result varsa, asagidan gelir */}
+      {result && (
+        <div className="animate-slide-up">
+          <Card>
+            <CompareResult result={result} />
+          </Card>
         </div>
-      </div>
+      )}
 
-      <p className="text-center text-slate-600 text-xs mt-6 animate-fade-in delay-3">
-        Her ölçüm 3 kez tekrarlanır, en hızlı süre alınır · Gerçek sunucu tarafı ölçüm
+      <p className="text-center text-slate-600 text-xs">
+        Her olcum 3 kez tekrarlanir, en hizli sure alinir · Gercek sunucu tarafi olcum
       </p>
     </div>
   );
 }
 
-function CompareResult({ result, onReset }) {
+function CompareResult({ result }) {
   const { serial_time, parallel_time, speedup } = result;
   const maxT = Math.max(serial_time || 0, parallel_time || 0) || 1;
   const parallelFaster = speedup != null && speedup >= 1;
   const speedupAnim = useCountUp(speedup ?? 0, 1000, 2);
 
   return (
-    <div className="space-y-6">
-      <div className="text-center space-y-1 animate-fade-in">
+    <div className="space-y-5">
+      <div className="text-center space-y-1">
         <p className="text-slate-300 text-sm font-medium break-all px-2">{result.filename.replace(/\.gz$/, "")}</p>
         <p className="text-slate-500 text-xs">
-          {formatBytes(result.original_bytes)} · {result.chunk_count} parça · {result.workers} worker
+          {formatBytes(result.original_bytes)} · {result.chunk_count} parca · {result.workers} worker
         </p>
       </div>
 
-      {/* Speedup — büyük count-up */}
-      <div className="text-center animate-pop-in">
+      {/* Speedup buyuk count-up */}
+      <div className="text-center">
         <div className={`text-6xl font-extrabold ${parallelFaster ? "text-emerald-400" : "text-amber-400"}`}>
           {speedupAnim}x
         </div>
         <div className="text-slate-500 text-sm mt-1">
-          {parallelFaster ? "paralel hızlanma" : "paralel daha yavaş"}
+          {parallelFaster ? "paralel hizlanma" : "paralel daha yavas"}
         </div>
       </div>
 
       {/* Animasyonlu barlar */}
-      <div className="space-y-4 bg-white/[0.03] rounded-2xl px-5 py-5 border border-white/8 animate-fade-in delay-1">
-        <TimeBar label="Seri" sub="tek thread, sırayla" time={serial_time}
-          pct={((serial_time || 0) / maxT) * 100}
-          barColor="from-red-600 to-red-400" dotColor="bg-red-500" delay={150} />
-        <TimeBar label="Paralel" sub={`${result.workers} worker, eş zamanlı`} time={parallel_time}
-          pct={((parallel_time || 0) / maxT) * 100}
-          barColor="from-emerald-600 to-emerald-400" dotColor="bg-emerald-500" delay={350} />
+      <div className="space-y-4 bg-white/[0.03] rounded-2xl px-5 py-5 border border-white/8">
+        <TimeBar
+          label="Seri" sub="tek thread, sirayla"
+          time={serial_time} pct={((serial_time || 0) / maxT) * 100}
+          barColor="from-red-600 to-red-400" dotColor="bg-red-500" delay={150}
+        />
+        <TimeBar
+          label="Paralel" sub={`${result.workers} worker, es zamanli`}
+          time={parallel_time} pct={((parallel_time || 0) / maxT) * 100}
+          barColor="from-emerald-600 to-emerald-400" dotColor="bg-emerald-500" delay={350}
+        />
       </div>
 
-      {/* Açıklama */}
-      <div className={`px-5 py-4 rounded-2xl border text-sm leading-relaxed animate-fade-in delay-2 ${
+      {/* Aciklama */}
+      <div className={`px-5 py-4 rounded-2xl border text-sm leading-relaxed ${
         parallelFaster
           ? "bg-emerald-500/8 border-emerald-500/20 text-emerald-300"
           : "bg-amber-500/8 border-amber-500/20 text-amber-300"
       }`}>
         {parallelFaster
-          ? `${result.chunk_count} parça ${result.workers} worker'a dağıtıldı. zlib GIL'i bıraktığı için thread'ler gerçekten eş zamanlı çalıştı.`
-          : `Bu dosya çok hızlı sıkıştı, thread başlatma maliyeti kazançtan büyük oldu. 1 MB+ ve sıkışabilir bir dosyada paralel belirgin şekilde öne geçer.`}
+          ? `${result.chunk_count} parca ${result.workers} worker'a dagitildi. zlib GIL'i birakti, thread'ler gercekten es zamanli calisit.`
+          : `Bu dosya cok hizli sikisti; thread baslatma maliyeti kazanctan buyuk oldu. 1 MB+ ve sikisabilir bir dosyada paralel belirgin sekilde one gecer.`}
       </div>
 
-      {/* Butonlar */}
-      <div className="flex gap-3 animate-fade-in delay-3">
-        <button
-          onClick={() => downloadBase64(result.file_b64, result.filename)}
-          className="shimmer relative overflow-hidden flex-1 min-w-0 py-3.5 rounded-2xl font-semibold text-white text-sm
-            bg-gradient-to-r from-violet-600 to-blue-600 hover:shadow-xl hover:shadow-violet-900/50 hover:-translate-y-0.5
-            transition-all duration-300 active:translate-y-0"
-        >
-          <span className="block truncate px-2">İndir · {result.filename}</span>
-        </button>
-        <button
-          onClick={onReset}
-          className="shrink-0 px-5 py-3.5 rounded-2xl font-medium text-slate-300 text-sm
-            bg-white/5 hover:bg-white/10 border border-white/10 transition-all duration-200 hover:-translate-y-0.5"
-        >
-          Yeni
-        </button>
-      </div>
+      <button
+        onClick={() => downloadBase64(result.file_b64, result.filename)}
+        className="shimmer relative overflow-hidden w-full py-3.5 rounded-2xl font-semibold text-white text-sm
+          bg-gradient-to-r from-violet-600 to-blue-600 hover:shadow-xl hover:shadow-violet-900/50 hover:-translate-y-0.5
+          transition-all duration-300 active:translate-y-0"
+      >
+        <span className="block truncate px-2">Indir · {result.filename}</span>
+      </button>
     </div>
   );
 }
@@ -173,6 +160,17 @@ function TimeBar({ label, sub, time, pct, barColor, dotColor, delay }) {
           className={`h-full rounded-full bg-gradient-to-r ${barColor} transition-[width] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)]`}
           style={{ width: `${w}%` }}
         />
+      </div>
+    </div>
+  );
+}
+
+function Card({ children }) {
+  return (
+    <div className="relative">
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-blue-600 rounded-[28px] blur opacity-20" />
+      <div className="relative bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-white/10 p-7 sm:p-8 space-y-5">
+        {children}
       </div>
     </div>
   );
