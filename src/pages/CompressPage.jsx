@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Dropzone from "../components/Dropzone";
+import { Card, Spinner } from "../components/Card";
 import { downloadBase64, formatBytes, formatTime } from "../lib/download";
 import { useCountUp } from "../lib/useCountUp";
 
@@ -35,7 +36,6 @@ export default function CompressPage() {
 
   return (
     <div className="w-full space-y-4">
-      {/* Kart 1: Her zaman gorunur */}
       <Card>
         <Dropzone file={file} onFile={(f) => { setFile(f); clearResult(); }} disabled={loading} />
 
@@ -56,7 +56,6 @@ export default function CompressPage() {
         </button>
       </Card>
 
-      {/* Kart 2: Sadece result varsa, asagidan gelir */}
       {result && (
         <div className="animate-slide-up">
           <Card>
@@ -65,7 +64,7 @@ export default function CompressPage() {
         </div>
       )}
 
-      <p className="text-center text-slate-600 text-xs">
+      <p className="text-center text-slate-500 text-xs">
         Vercel sunucusunda zlib/gzip ile sikistirilir · Indirilen .gz dosyasi 7-Zip ile acilabilir
       </p>
     </div>
@@ -89,7 +88,6 @@ function SuccessResult({ result }) {
         </p>
       </div>
 
-      {/* Buyuk tasarruf sayisi */}
       <div className="text-center">
         <div className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-400">
           %{savings}
@@ -97,7 +95,6 @@ function SuccessResult({ result }) {
         <div className="text-slate-500 text-sm mt-1">daha kucuk</div>
       </div>
 
-      {/* Boyut karsilastirma */}
       <div className="flex items-center gap-4 bg-white/[0.03] rounded-2xl px-5 py-4 border border-white/8">
         <div className="flex-1 text-center min-w-0">
           <p className="text-slate-500 text-[11px] uppercase tracking-widest mb-1">Orijinal</p>
@@ -124,30 +121,10 @@ function SuccessResult({ result }) {
   );
 }
 
-function Card({ children }) {
-  return (
-    <div className="relative">
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-blue-600 rounded-[28px] blur opacity-20" />
-      <div className="relative bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-white/10 p-7 sm:p-8 space-y-5">
-        {children}
-      </div>
-    </div>
-  );
-}
-
 function ErrorBox({ msg }) {
   return (
     <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-sm">
       {msg}
     </div>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-    </svg>
   );
 }

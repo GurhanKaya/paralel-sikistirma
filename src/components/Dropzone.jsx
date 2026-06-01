@@ -30,7 +30,7 @@ export default function Dropzone({ file, onFile, disabled }) {
         onDragOver={(e) => { e.preventDefault(); if (!disabled) setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onDrop={(e) => { e.preventDefault(); setDragging(false); if (!disabled) pick(e.dataTransfer.files[0]); }}
-        className={`group relative cursor-pointer rounded-2xl border-2 border-dashed py-14 px-6 text-center
+        className={`group relative cursor-pointer rounded-2xl border-2 border-dashed py-10 px-6 text-center
           transition-all duration-300 overflow-hidden
           ${disabled ? "opacity-50 cursor-not-allowed" : ""}
           ${dragging

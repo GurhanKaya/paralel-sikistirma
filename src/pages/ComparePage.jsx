@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Dropzone from "../components/Dropzone";
+import { Card, Spinner } from "../components/Card";
 import { downloadBase64, formatBytes, formatTime } from "../lib/download";
 import { useCountUp } from "../lib/useCountUp";
 
@@ -35,7 +36,6 @@ export default function ComparePage() {
 
   return (
     <div className="w-full space-y-4">
-      {/* Kart 1: Her zaman gorunur */}
       <Card>
         <Dropzone file={file} onFile={(f) => { setFile(f); clearResult(); }} disabled={loading} />
 
@@ -60,7 +60,6 @@ export default function ComparePage() {
         </button>
       </Card>
 
-      {/* Kart 2: Sadece result varsa, asagidan gelir */}
       {result && (
         <div className="animate-slide-up">
           <Card>
@@ -69,7 +68,7 @@ export default function ComparePage() {
         </div>
       )}
 
-      <p className="text-center text-slate-600 text-xs">
+      <p className="text-center text-slate-500 text-xs">
         Her olcum 3 kez tekrarlanir, en hizli sure alinir · Gercek sunucu tarafi olcum
       </p>
     </div>
@@ -91,7 +90,6 @@ function CompareResult({ result }) {
         </p>
       </div>
 
-      {/* Speedup buyuk count-up */}
       <div className="text-center">
         <div className={`text-6xl font-extrabold ${parallelFaster ? "text-emerald-400" : "text-amber-400"}`}>
           {speedupAnim}x
@@ -101,7 +99,6 @@ function CompareResult({ result }) {
         </div>
       </div>
 
-      {/* Animasyonlu barlar */}
       <div className="space-y-4 bg-white/[0.03] rounded-2xl px-5 py-5 border border-white/8">
         <TimeBar
           label="Seri" sub="tek thread, sirayla"
@@ -115,7 +112,6 @@ function CompareResult({ result }) {
         />
       </div>
 
-      {/* Aciklama */}
       <div className={`px-5 py-4 rounded-2xl border text-sm leading-relaxed ${
         parallelFaster
           ? "bg-emerald-500/8 border-emerald-500/20 text-emerald-300"
@@ -162,25 +158,5 @@ function TimeBar({ label, sub, time, pct, barColor, dotColor, delay }) {
         />
       </div>
     </div>
-  );
-}
-
-function Card({ children }) {
-  return (
-    <div className="relative">
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-blue-600 rounded-[28px] blur opacity-20" />
-      <div className="relative bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-white/10 p-7 sm:p-8 space-y-5">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-    </svg>
   );
 }
