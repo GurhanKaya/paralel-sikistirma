@@ -74,7 +74,8 @@ export default function CompressPage() {
 }
 
 function SuccessResult({ result }) {
-  const savings = useCountUp(result.savings_pct, 900, 1);
+  const gained = result.savings_pct > 0;
+  const savings = useCountUp(Math.abs(result.savings_pct), 900, 1);
 
   return (
     <div className="space-y-5">
@@ -91,10 +92,16 @@ function SuccessResult({ result }) {
       </div>
 
       <div className="text-center">
-        <div className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-400">
+        <div className={`text-5xl font-extrabold ${
+          gained
+            ? "text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-400"
+            : "text-red-400"
+        }`}>
           %{savings}
         </div>
-        <div className="text-slate-500 text-sm mt-1">daha küçük</div>
+        <div className="text-slate-500 text-sm mt-1">
+          {gained ? "daha küçük" : "daha büyük (gzip başlığı küçük dosyayı şişirir)"}
+        </div>
       </div>
 
       <div className="flex items-center gap-4 bg-white/[0.03] rounded-2xl px-5 py-4 border border-white/8">
@@ -107,7 +114,7 @@ function SuccessResult({ result }) {
         </svg>
         <div className="flex-1 text-center min-w-0">
           <p className="text-slate-500 text-[11px] uppercase tracking-widest mb-1">Sıkıştırılmış</p>
-          <p className="text-emerald-400 font-bold text-lg truncate">{formatBytes(result.compressed_bytes)}</p>
+          <p className={`font-bold text-lg truncate ${gained ? "text-emerald-400" : "text-red-400"}`}>{formatBytes(result.compressed_bytes)}</p>
         </div>
       </div>
 
